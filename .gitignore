@@ -1,0 +1,17 @@
+.venv/
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+*.egg-info/
+build/
+dist/
+.env
+checkpoints/
+*.pt
+*.onnx
+data/
+exports/
+node_modules/
+.idea/
+.vscode/
