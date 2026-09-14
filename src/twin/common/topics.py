@@ -39,3 +39,11 @@ def parse_topic(topic: str) -> TopicParts:
         if not SEGMENT_PATTERN.match(segment):
             raise TopicError(f"invalid topic segment: {segment!r}")
     return TopicParts(*segments[1:])
+
+
+@dataclass(frozen=True)
+class Reading:
+    device_key: str
+    metric: str
+    ts: float
+    value: float
