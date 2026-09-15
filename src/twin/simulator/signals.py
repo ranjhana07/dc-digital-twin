@@ -99,3 +99,29 @@ def crac_power(cooling_pct: float) -> float:
 
 def rack_inlet_temp(supply_temp: float, recirculation: float, rack_load: float, noise: float) -> float:
     return supply_temp + recirculation + 3.0 * (rack_load - 0.5) + noise
+
+
+NOMINAL_RX_DBM = -2.5
+NOMINAL_TX_DBM = -1.0
+
+
+def module_temp(inlet_temp: float, traffic: float) -> float:
+    return inlet_temp + 15.0 + 4.0 * traffic
+
+
+def rx_power_dbm(baseline_dbm: float, extra_loss_db: float, noise: float) -> float:
+    return baseline_dbm - extra_loss_db + noise
+
+
+def tx_power_dbm(baseline_dbm: float, temp_c: float, noise: float) -> float:
+    return baseline_dbm - 0.02 * (temp_c - 40.0) + noise
+
+
+def pre_fec_ber_log10(rx_dbm: float, temp_c: float, noise: float) -> float:
+    margin_loss = NOMINAL_RX_DBM - rx_dbm
+    thermal = 0.03 * max(temp_c - 55.0, 0.0)
+    return -9.0 + 0.55 * margin_loss + thermal + noise
+
+
+def pre_fec_ber(rx_dbm: float, temp_c: float, noise: float) -> float:
+    return 10.0 ** clip(pre_fec_ber_log10(rx_dbm, temp_c, noise), -12.0, -1.0)
