@@ -59,3 +59,43 @@ def switch_power(traffic: float) -> float:
 
 def switch_fan_rpm(inlet_temp: float, health: float = 1.0) -> float:
     return (4200.0 + 150.0 * max(inlet_temp - 20.0, 0.0)) * health
+
+
+PDU_VOLTAGE = 230.0
+PDU_OVERHEAD = 1.02
+
+
+def pdu_power(device_powers: list[float]) -> float:
+    return sum(device_powers) * PDU_OVERHEAD
+
+
+def pdu_current(power_w: float, voltage: float = PDU_VOLTAGE) -> float:
+    return power_w / voltage
+
+
+def pdu_load_pct(power_w: float, capacity_w: float) -> float:
+    return 100.0 * power_w / capacity_w
+
+
+def crac_supply_temp(setpoint: float, cooling_factor: float, hall_load: float) -> float:
+    return setpoint + 1.5 * hall_load + 11.0 * (1.0 - cooling_factor)
+
+
+def crac_return_temp(supply_temp: float, hall_load: float) -> float:
+    return supply_temp + 8.0 + 6.0 * hall_load
+
+
+def crac_cooling_pct(hall_load: float, cooling_factor: float) -> float:
+    return clip(100.0 * hall_load / max(cooling_factor, 0.05) * 0.8, 0.0, 100.0)
+
+
+def crac_fan_rpm(cooling_pct: float) -> float:
+    return 1200.0 + 9.0 * cooling_pct
+
+
+def crac_power(cooling_pct: float) -> float:
+    return 3000.0 + 50.0 * cooling_pct
+
+
+def rack_inlet_temp(supply_temp: float, recirculation: float, rack_load: float, noise: float) -> float:
+    return supply_temp + recirculation + 3.0 * (rack_load - 0.5) + noise
