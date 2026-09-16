@@ -120,7 +120,7 @@ def tx_power_dbm(baseline_dbm: float, temp_c: float, noise: float) -> float:
 def pre_fec_ber_log10(rx_dbm: float, temp_c: float, noise: float) -> float:
     margin_loss = NOMINAL_RX_DBM - rx_dbm
     thermal = 0.03 * max(temp_c - 55.0, 0.0)
-    return -9.0 + 0.55 * margin_loss + thermal + noise
+    return -9.0 + 0.6 * margin_loss + thermal + noise
 
 
 def pre_fec_ber(rx_dbm: float, temp_c: float, noise: float) -> float:

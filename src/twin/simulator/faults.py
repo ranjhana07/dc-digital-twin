@@ -56,7 +56,7 @@ class FaultEffects:
 
 COOLING_LOSS = 0.85
 FAN_LOSS = 0.65
-OPTICS_LOSS_DB = 7.5
+OPTICS_LOSS_DB = 9.0
 
 
 class FaultSchedule:
