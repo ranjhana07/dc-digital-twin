@@ -28,3 +28,9 @@ GROUP BY 1, 2, 3
 WITH NO DATA;
 
 CREATE UNIQUE INDEX telemetry_1h_key_idx ON telemetry_1h (device_key, metric, bucket);
+
+CREATE VIEW latest_telemetry AS
+SELECT DISTINCT ON (device_key, metric) device_key, metric, value, ts
+FROM telemetry
+WHERE ts > now() - interval '15 minutes'
+ORDER BY device_key, metric, ts DESC;
