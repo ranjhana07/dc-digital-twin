@@ -13,7 +13,10 @@ class Batcher(Generic[T]):
         max_size: int = 2000,
         max_age_s: float = 1.0,
         clock: Callable[[], float] = time.monotonic,
+        max_backlog: int = 200_000,
     ) -> None:
+        self.max_backlog = max_backlog
+        self.requeued = 0
         self.sink = sink
         self.max_size = max_size
         self.max_age_s = max_age_s
@@ -51,12 +54,24 @@ class Batcher(Generic[T]):
         with self._lock:
             return len(self._items)
 
+    def _requeue(self, batch: list[T]) -> None:
+        with self._lock:
+            self._items = batch + self._items
+            if len(self._items) > self.max_backlog:
+                del self._items[: len(self._items) - self.max_backlog]
+            self._opened_at = self.clock()
+            self.requeued += len(batch)
+
     def _take(self) -> list[T]:
         batch, self._items = self._items, []
         return batch
 
     def _write(self, batch: list[T]) -> int:
-        self.sink(batch)
+        try:
+            self.sink(batch)
+        except Exception:
+            self._requeue(batch)
+            raise
         self.flushed_batches += 1
         self.flushed_items += len(batch)
         return len(batch)

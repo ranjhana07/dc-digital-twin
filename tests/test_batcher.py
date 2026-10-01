@@ -54,3 +54,41 @@ def test_manual_flush_and_counters():
     assert batcher.flush() == 0
     assert batcher.flushed_batches == 1
     assert batcher.flushed_items == 2
+
+
+def test_failed_write_keeps_items_for_retry():
+    calls = []
+
+    def flaky(batch):
+        calls.append(list(batch))
+        if len(calls) == 1:
+            raise RuntimeError("db down")
+
+    clock = FakeClock()
+    batcher = Batcher(flaky, max_size=2, max_age_s=1.0, clock=clock)
+    batcher.add(1)
+    try:
+        batcher.add(2)
+    except RuntimeError:
+        pass
+    assert batcher.pending() == 2
+    clock.now = 5.0
+    assert batcher.flush_if_due() == 2
+    assert calls == [[1, 2], [1, 2]]
+
+
+def test_backlog_is_capped():
+    batcher = Batcher(lambda batch: (_ for _ in ()).throw(RuntimeError("down")), max_size=3, max_backlog=4)
+    for index in range(3):
+        try:
+            batcher.add(index)
+        except RuntimeError:
+            pass
+    for index in range(3, 6):
+        batcher._items.append(index)
+    try:
+        batcher.flush()
+    except RuntimeError:
+        pass
+    assert batcher.pending() == 4
+    assert batcher.requeued > 0
