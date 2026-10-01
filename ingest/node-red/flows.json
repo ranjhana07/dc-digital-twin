@@ -1,0 +1,204 @@
+[
+  {
+    "id": "tab-ingest",
+    "type": "tab",
+    "label": "Telemetry ingest",
+    "disabled": false,
+    "info": ""
+  },
+  {
+    "id": "broker",
+    "type": "mqtt-broker",
+    "name": "mosquitto",
+    "broker": "${MQTT_HOST}",
+    "port": "1883",
+    "clientid": "twin-nodered",
+    "autoConnect": true,
+    "usetls": false,
+    "protocolVersion": "4",
+    "keepalive": "30",
+    "cleansession": true
+  },
+  {
+    "id": "pgconf",
+    "type": "postgreSQLConfig",
+    "name": "twin",
+    "host": "${PGHOST}",
+    "hostFieldType": "str",
+    "port": "5432",
+    "portFieldType": "num",
+    "database": "${PGDATABASE}",
+    "databaseFieldType": "str",
+    "ssl": "false",
+    "sslFieldType": "bool",
+    "applicationName": "node-red-ingest",
+    "applicationNameType": "str",
+    "max": "10",
+    "maxFieldType": "num",
+    "idle": "1000",
+    "idleFieldType": "num",
+    "connectionTimeout": "10000",
+    "connectionTimeoutFieldType": "num",
+    "user": "${PGUSER}",
+    "userFieldType": "str",
+    "password": "${PGPASSWORD}",
+    "passwordFieldType": "str"
+  },
+  {
+    "id": "mqtt-in",
+    "type": "mqtt in",
+    "z": "tab-ingest",
+    "name": "dc telemetry",
+    "topic": "dc/+/+/+/+/+",
+    "qos": "0",
+    "datatype": "auto-detect",
+    "broker": "broker",
+    "nl": false,
+    "rap": true,
+    "rh": 0,
+    "inputs": 0,
+    "x": 150,
+    "y": 120,
+    "wires": [
+      [
+        "validate"
+      ]
+    ]
+  },
+  {
+    "id": "validate",
+    "type": "function",
+    "z": "tab-ingest",
+    "name": "validate and shape row",
+    "func": "const parts = msg.topic.split(\"/\");\nconst known = new Set([\"cpu_load\", \"power_w\", \"fan_rpm\", \"inlet_temp\", \"outlet_temp\", \"module_temp\", \"supply_temp\", \"return_temp\", \"rx_power_dbm\", \"tx_power_dbm\", \"pre_fec_ber\", \"current_a\", \"load_pct\", \"cooling_pct\"]);\nconst segment = /^[A-Za-z0-9_-]+$/;\nconst reject = (reason) => {\n    const counts = flow.get(\"rejected\") || {};\n    counts[reason] = (counts[reason] || 0) + 1;\n    flow.set(\"rejected\", counts);\n    return [null, { payload: reason, topic: msg.topic }];\n};\nif (parts.length !== 6 || parts[0] !== \"dc\" || !parts.slice(1).every((part) => segment.test(part))) {\n    return reject(\"topic\");\n}\nconst metric = parts[5];\nif (!known.has(metric)) {\n    return reject(\"metric\");\n}\nlet body = msg.payload;\nif (typeof body === \"string\" || Buffer.isBuffer(body)) {\n    try {\n        body = JSON.parse(body.toString());\n    } catch (err) {\n        return reject(\"json\");\n    }\n}\nconst value = Number(body && body.value);\nconst ts = Number(body && body.ts);\nif (!Number.isFinite(value) || !Number.isFinite(ts)) {\n    return reject(\"value\");\n}\nconst skewSeconds = Math.abs(Date.now() / 1000 - ts);\nif (skewSeconds > 86400) {\n    return reject(\"skew\");\n}\nmsg.payload = [new Date(ts * 1000).toISOString(), parts.slice(1, 5).join(\"/\"), metric, value];\nreturn [msg, null];",
+    "outputs": 2,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 380,
+    "y": 120,
+    "wires": [
+      [
+        "batch"
+      ],
+      [
+        "rejected"
+      ]
+    ]
+  },
+  {
+    "id": "batch",
+    "type": "join",
+    "z": "tab-ingest",
+    "name": "batch 500 or 1s",
+    "mode": "custom",
+    "build": "array",
+    "property": "payload",
+    "propertyType": "msg",
+    "key": "topic",
+    "joiner": "\n",
+    "joinerType": "str",
+    "accumulate": false,
+    "timeout": "1",
+    "count": "500",
+    "reduceRight": false,
+    "reduceExp": "",
+    "reduceInit": "",
+    "reduceInitType": "",
+    "reduceFixup": "",
+    "x": 620,
+    "y": 120,
+    "wires": [
+      [
+        "params"
+      ]
+    ]
+  },
+  {
+    "id": "params",
+    "type": "function",
+    "z": "tab-ingest",
+    "name": "build unnest insert",
+    "func": "const rows = msg.payload;\nmsg.query = \"INSERT INTO telemetry (ts, device_key, metric, value) SELECT * FROM unnest($1::timestamptz[], $2::text[], $3::text[], $4::float8[])\";\nmsg.params = [\n    rows.map((row) => row[0]),\n    rows.map((row) => row[1]),\n    rows.map((row) => row[2]),\n    rows.map((row) => row[3])\n];\nnode.status({ fill: \"green\", shape: \"dot\", text: rows.length + \" rows\" });\nreturn msg;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 840,
+    "y": 120,
+    "wires": [
+      [
+        "insert"
+      ]
+    ]
+  },
+  {
+    "id": "insert",
+    "type": "postgresql",
+    "z": "tab-ingest",
+    "name": "insert batch",
+    "query": "",
+    "postgreSQLConfig": "pgconf",
+    "split": false,
+    "rowsPerMsg": 1,
+    "outputs": 1,
+    "x": 1050,
+    "y": 120,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "rejected",
+    "type": "debug",
+    "z": "tab-ingest",
+    "name": "rejected messages",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": true,
+    "complete": "payload",
+    "targetType": "msg",
+    "statusVal": "payload",
+    "statusType": "auto",
+    "x": 640,
+    "y": 200,
+    "wires": []
+  },
+  {
+    "id": "failures",
+    "type": "catch",
+    "z": "tab-ingest",
+    "name": "insert errors",
+    "scope": [
+      "insert"
+    ],
+    "uncaught": false,
+    "x": 640,
+    "y": 280,
+    "wires": [
+      [
+        "failure-log"
+      ]
+    ]
+  },
+  {
+    "id": "failure-log",
+    "type": "debug",
+    "z": "tab-ingest",
+    "name": "error",
+    "active": true,
+    "tosidebar": true,
+    "console": true,
+    "tostatus": false,
+    "complete": "error.message",
+    "targetType": "msg",
+    "x": 850,
+    "y": 280,
+    "wires": []
+  }
+]

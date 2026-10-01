@@ -1,0 +1,13 @@
+{
+  "name": "dc-twin-node-red",
+  "description": "Node-RED ingestion flow for the data center digital twin",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "node-red": "4.0.9",
+    "node-red-contrib-postgresql": "0.15.1"
+  },
+  "scripts": {
+    "start": "node-red --settings ./settings.js"
+  }
+}
