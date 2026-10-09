@@ -32,3 +32,12 @@ def test_servers_depend_on_rack_pdu_and_switch():
 def test_device_keys_are_unique():
     topology = build_topology(sites=2, halls=2, racks_per_hall=3)
     assert len(topology.devices) == len({device.key for device in topology.devices.values()})
+
+
+def test_device_type_and_rack_from_key():
+    from twin.common.topology import device_type_of, rack_key_of
+
+    assert device_type_of("dc1/hall-a/r01/xcvr-2") == DeviceType.TRANSCEIVER
+    assert device_type_of("dc1/hall-a/hall/crac-1") == DeviceType.CRAC
+    assert device_type_of("dc1/hall-a/r01/mystery") is None
+    assert rack_key_of("dc1/hall-a/r01/srv-01") == "dc1/hall-a/r01"
