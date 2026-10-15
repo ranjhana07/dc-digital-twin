@@ -115,3 +115,24 @@ def _populate_rack(topology: Topology, rack: Rack, servers: int, xcvrs: int) -> 
             topology.edges.append(Edge(device.key, switch.key, "uplinks_to"))
         if device.type == DeviceType.TRANSCEIVER:
             topology.edges.append(Edge(device.key, switch.key, "part_of"))
+
+
+DEVICE_PREFIXES: dict[str, DeviceType] = {
+    "srv-": DeviceType.SERVER,
+    "sw-": DeviceType.SWITCH,
+    "xcvr-": DeviceType.TRANSCEIVER,
+    "pdu-": DeviceType.PDU,
+    "crac-": DeviceType.CRAC,
+}
+
+
+def device_type_of(device_key: str) -> DeviceType | None:
+    code = device_key.rsplit("/", 1)[-1]
+    for prefix, device_type in DEVICE_PREFIXES.items():
+        if code.startswith(prefix):
+            return device_type
+    return None
+
+
+def rack_key_of(device_key: str) -> str:
+    return device_key.rsplit("/", 1)[0]
