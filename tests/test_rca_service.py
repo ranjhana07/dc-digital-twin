@@ -28,4 +28,4 @@ def test_describe_mentions_kind_and_counts():
     runs = analyze([AlertRecord(1, "dc1/hall-a/r01/xcvr-1", "pre_fec_ber", "critical", T0)], graph)
     text = describe(runs[0].candidates[0])
     assert "dirty optics" in text
-    assert "1 alerts" in text
+    assert "1 alert on 1 device" in text
