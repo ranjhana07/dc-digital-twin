@@ -38,7 +38,8 @@ def create_app(repository: Repository | None = None, settings: Settings | None =
     async def healthz() -> dict[str, str]:
         return {"status": "ok"}
 
-    from twin.api.routers import fleet
+    from twin.api.routers import fleet, telemetry
 
-    app.include_router(fleet.router, prefix="/api")
+    for router_module in (fleet, telemetry):
+        app.include_router(router_module.router, prefix="/api")
     return app
