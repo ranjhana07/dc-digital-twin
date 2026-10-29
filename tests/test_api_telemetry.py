@@ -59,3 +59,13 @@ def test_series_downsamples_into_buckets(client, repo):
     assert first["min"] <= first["avg"] <= first["max"]
     parsed = datetime.fromisoformat(first["ts"].replace("Z", "+00:00"))
     assert parsed.tzinfo == timezone.utc
+
+
+def test_series_bucket_is_widened_to_cap_point_count(client, repo):
+    seed_history(repo)
+    params = {"device_key": DEVICE, "metric": "inlet_temp", "bucket_s": 1, "start": (NOW - timedelta(days=30)).isoformat(), "end": NOW.isoformat()}
+    body = client.get("/api/telemetry/series", params=params).json()
+    assert body["bucket_s"] == 1296
+    from twin.api.routers.telemetry import effective_bucket
+
+    assert effective_bucket(NOW - timedelta(minutes=10), NOW, 60) == 60

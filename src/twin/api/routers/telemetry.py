@@ -1,3 +1,4 @@
+import math
 from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -8,6 +9,13 @@ from twin.api.schemas import PointOut, ReadingOut, SeriesOut
 from twin.common.metrics import ALL_METRICS
 
 router = APIRouter(prefix="/telemetry", tags=["telemetry"])
+
+MAX_SERIES_POINTS = 2000
+
+
+def effective_bucket(start: datetime, end: datetime, requested_s: int, max_points: int = MAX_SERIES_POINTS) -> int:
+    span_s = (end - start).total_seconds()
+    return max(requested_s, math.ceil(span_s / max_points))
 
 
 def require_metric(metric: str) -> str:
@@ -57,5 +65,6 @@ async def series(
     repo: Repository = Depends(get_repository),
 ) -> SeriesOut:
     start, end = default_window(start, end, 60)
+    bucket_s = effective_bucket(start, end, bucket_s)
     points = await repo.telemetry_series(device_key, metric, start, end, bucket_s)
     return SeriesOut(device_key=device_key, metric=metric, bucket_s=bucket_s, points=points)
