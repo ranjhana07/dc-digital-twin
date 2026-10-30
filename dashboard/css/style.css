@@ -210,3 +210,26 @@ button:disabled { opacity: 0.5; cursor: default; }
   .main { padding: 16px; }
   .grid-two, .grid-even { grid-template-columns: 1fr; }
 }
+
+.rack-list { display: flex; flex-direction: column; gap: 10px; }
+.rack-row { display: grid; grid-template-columns: 120px 1fr 36px minmax(0, 160px); align-items: center; gap: 12px; }
+.rack-name { color: var(--text); text-decoration: none; font-weight: 500; white-space: nowrap; }
+.rack-name:hover { color: var(--accent); }
+.rack-score { text-align: right; }
+.rack-hint { font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.risk-score { font-size: 44px; font-weight: 700; line-height: 1; margin-bottom: 8px; }
+.risk-score.ok { color: var(--ok); }
+.risk-score.warn { color: var(--warn); }
+.risk-score.crit { color: var(--crit); }
+.facts { display: grid; grid-template-columns: 1fr auto; gap: 6px 12px; margin: 12px 0 0; }
+.facts dt { color: var(--muted); }
+.facts dd { margin: 0; text-align: right; }
+tr.pick { cursor: pointer; }
+
+.actions { white-space: nowrap; text-align: right; }
+.rca-card { padding: 14px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg-raised); margin-bottom: 12px; display: flex; flex-direction: column; gap: 8px; }
+.rca-card h3 { font-family: var(--mono); font-size: 13px; word-break: break-all; }
+.rca-top, .rca-meta { display: flex; justify-content: space-between; align-items: center; font-size: 12px; }
+.rca-others { list-style: none; margin: 4px 0 0; padding: 8px 0 0; border-top: 1px dashed var(--line-strong); font-size: 12px; font-family: var(--mono); }
+.rca-others li { display: flex; justify-content: space-between; padding: 2px 0; }
