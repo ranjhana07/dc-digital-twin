@@ -9,7 +9,7 @@ export function poll(task, intervalMs) {
     try {
       await task();
     } catch (error) {
-      console.warn("refresh failed", error);
+      window.dispatchEvent(new CustomEvent("twin:error", { detail: error }));
     }
     if (!stopped) {
       timer = setTimeout(run, intervalMs);

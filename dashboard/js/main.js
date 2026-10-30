@@ -5,12 +5,14 @@ import * as overview from "./views/overview.js";
 import * as alerts from "./views/alerts.js";
 import * as forecasts from "./views/forecasts.js";
 import * as telemetry from "./views/telemetry.js";
+import * as topology from "./views/topology.js";
 
 const VIEWS = {
   overview: { module: overview, title: "Overview", subtitle: "Fleet health across all halls" },
   telemetry: { module: telemetry, title: "Live telemetry", subtitle: "Streaming readings for a single device" },
   forecasts: { module: forecasts, title: "Forecasts", subtitle: "GRU forecasts, confidence bands and risk" },
   alerts: { module: alerts, title: "Alerts and root cause", subtitle: "Open alerts ranked into probable causes" },
+  topology: { module: topology, title: "Topology", subtitle: "Racks and cooling units colored by health score" },
 };
 
 const container = document.getElementById("view");
@@ -69,6 +71,15 @@ async function checkApi() {
 function tickClock() {
   document.getElementById("clock").textContent = clockText();
 }
+
+let lastErrorAt = 0;
+window.addEventListener("twin:error", (event) => {
+  const now = Date.now();
+  if (now - lastErrorAt > 30000) {
+    lastErrorAt = now;
+    toast(`Refresh failed: ${event.detail.message}`);
+  }
+});
 
 window.addEventListener("hashchange", navigate);
 setInterval(tickClock, 1000);

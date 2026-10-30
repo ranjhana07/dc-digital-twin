@@ -233,3 +233,37 @@ tr.pick { cursor: pointer; }
 .rca-top, .rca-meta { display: flex; justify-content: space-between; align-items: center; font-size: 12px; }
 .rca-others { list-style: none; margin: 4px 0 0; padding: 8px 0 0; border-top: 1px dashed var(--line-strong); font-size: 12px; font-family: var(--mono); }
 .rca-others li { display: flex; justify-content: space-between; padding: 2px 0; }
+
+.halls { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 16px; }
+.hall svg { width: 100%; height: auto; display: block; }
+.legend { display: flex; flex-wrap: wrap; gap: 18px; margin-bottom: 14px; font-size: 12px; align-items: center; }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; }
+
+.rack { cursor: pointer; transition: opacity 150ms; outline: none; }
+.rack.dim { opacity: 0.28; }
+.rack-body { fill: var(--bg-raised); stroke-width: 1.5; }
+.rack-fill { opacity: 0.1; pointer-events: none; }
+.rack:hover .rack-fill, .rack:focus .rack-fill { opacity: 0.22; }
+.rack-label { fill: var(--muted); font-size: 11px; font-weight: 600; letter-spacing: 0.08em; }
+.rack-score { font-family: var(--mono); font-size: 20px; font-weight: 700; }
+.slot { fill: var(--line-strong); }
+.alert-dot { fill: var(--crit); }
+.alert-count { fill: #fff; font-size: 11px; font-weight: 700; text-anchor: middle; }
+
+.crac rect { fill: var(--bg-raised); stroke: var(--line-strong); stroke-width: 1; }
+.crac text { fill: var(--text); font-size: 11px; font-weight: 600; letter-spacing: 0.06em; }
+.crac .fan { fill: none; stroke: var(--info); stroke-width: 2; stroke-dasharray: 6 4; }
+.crac { cursor: pointer; }
+.crac:hover rect { stroke: var(--info); }
+
+.link { fill: none; stroke: var(--line-strong); stroke-width: 1; opacity: 0.5; transition: stroke 150ms, opacity 150ms; }
+.link.on { stroke: var(--info); stroke-width: 2; opacity: 1; }
+
+.detail { margin-top: 16px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { padding: 2px 8px; border-radius: 6px; background: var(--bg-raised); border: 1px solid var(--line); font-size: 12px; color: var(--muted); }
+.chip b { color: var(--text); font-weight: 600; margin-left: 4px; }
+.chip.warn { border-color: rgba(245, 165, 36, 0.5); }
+.chip.warn b { color: var(--warn); }
+.chip.crit { border-color: rgba(242, 84, 91, 0.55); }
+.chip.crit b { color: var(--crit); }
