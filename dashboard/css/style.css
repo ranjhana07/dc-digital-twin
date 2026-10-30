@@ -267,3 +267,14 @@ tr.pick { cursor: pointer; }
 .chip.warn b { color: var(--warn); }
 .chip.crit { border-color: rgba(242, 84, 91, 0.55); }
 .chip.crit b { color: var(--crit); }
+
+@media (prefers-reduced-motion: reduce) {
+  .pill-live::before { animation: none; }
+  * { transition: none !important; }
+}
+
+.card:focus-within { border-color: var(--line-strong); }
+.table td:first-child { white-space: nowrap; }
+.view { animation: fade 160ms ease-out; }
+
+@keyframes fade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
