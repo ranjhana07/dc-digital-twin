@@ -17,7 +17,7 @@ export async function mount(container, { live, meta }) {
     container.innerHTML = `<div class="card empty">No devices registered yet.</div>`;
     return {};
   }
-  const state = { deviceKey: groups[0].devices[0].device_key, metric: null, points: [], chart: null };
+  const state = { deviceKey: groups[0].devices[0].device_key, metric: null, points: [], chart: null, loadId: 0 };
   container.innerHTML = `
     <div class="controls">
       <select id="device" aria-label="Device"></select>
@@ -42,6 +42,7 @@ export async function mount(container, { live, meta }) {
   }
 
   async function load() {
+    const loadId = ++state.loadId;
     const type = deviceTypeOf(groups, state.deviceKey);
     const metrics = meta.device_types[type];
     if (!metrics.includes(state.metric)) {
@@ -55,6 +56,9 @@ export async function mount(container, { live, meta }) {
       api.series(state.deviceKey, state.metric, WINDOW_MINUTES, 15),
       api.latest({ device_key: state.deviceKey }),
     ]);
+    if (loadId !== state.loadId) {
+      return;
+    }
     latest.forEach((row) => {
       latestByMetric[row.metric] = row.value;
     });

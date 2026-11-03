@@ -1,7 +1,9 @@
-export const API_BASE = window.TWIN_API_BASE || "/api";
+const globals = typeof window === "undefined" ? {} : window;
+
+export const API_BASE = globals.TWIN_API_BASE || "/api";
 
 export function wsUrl(path) {
-  const base = window.TWIN_WS_BASE || `${location.protocol === "https:" ? "wss" : "ws"}://${location.host}`;
+  const base = globals.TWIN_WS_BASE || `${location.protocol === "https:" ? "wss" : "ws"}://${location.host}`;
   return `${base}${path}`;
 }
 
