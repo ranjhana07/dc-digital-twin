@@ -147,12 +147,15 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--layers", type=int, default=TrainConfig.num_layers)
     parser.add_argument("--lr", type=float, default=TrainConfig.learning_rate)
     parser.add_argument("--seed", type=int, default=TrainConfig.seed)
+    parser.add_argument("--threads", type=int, default=0, help="torch intra-op threads, 0 keeps the default")
     return parser.parse_args()
 
 
 def main() -> None:
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(message)s")
     args = parse_args()
+    if args.threads:
+        torch.set_num_threads(args.threads)
     long_frame = load_csv(args.csv) if args.csv else load_postgres(args.dsn, args.since, args.until)
     window = WindowConfig(args.input_len, args.horizon, args.step, args.stride)
     config = TrainConfig(
