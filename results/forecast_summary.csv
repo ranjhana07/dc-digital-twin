@@ -1,0 +1,7 @@
+task,target,gru_mae,persistence_mae,mae_reduction_pct,gru_rmse,persistence_rmse,rmse_reduction_pct,gru_mape_pct,persistence_mape_pct,test_windows
+ber,rx_power_dbm,0.0636,0.0778,18.2,0.2756,0.2814,2.1,2.332,2.908,3120
+ber,pre_fec_ber,0.1432,0.1804,20.6,0.2335,0.2686,13.1,1.636,2.048,3120
+power,power_w,44.8528,48.9548,8.4,69.8703,74.6268,6.4,3.243,3.546,1560
+power,load_pct,1.8699,2.0398,8.3,2.9141,3.1095,6.3,3.245,3.546,1560
+thermal,inlet_temp,0.2454,0.285,13.9,0.307,0.3576,14.1,1.101,1.275,6240
+thermal,outlet_temp,0.2537,0.2799,9.4,0.3754,0.4078,8.0,0.795,0.878,6240
