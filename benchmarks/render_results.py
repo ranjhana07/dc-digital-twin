@@ -70,6 +70,15 @@ def latency_section(results: Path) -> str:
     return f"Torch threads: {report['torch_threads']}.\n\n{forward}\n\nFull thermal cycle (assemble windows, two forecasts per device, risk and alert specs, in-memory store):\n\n{cycle}"
 
 
+def lead_text(report: dict) -> str:
+    if not report["forecast_lead_samples"]:
+        return "No forecast-only alert fired before a threshold breach on an affected series."
+    return (
+        f"Median lead of a forecast-only alert over the first threshold breach: {report['forecast_lead_minutes_median']} min "
+        f"({report['forecast_lead_samples']} series)."
+    )
+
+
 def risk_section(results: Path) -> str:
     report = json.loads((results / "risk_detection.json").read_text())
     setup, samples, fault_level = report["setup"], report["samples"], report["fault_level"]
@@ -83,8 +92,7 @@ def risk_section(results: Path) -> str:
         f"- Sample level: precision {report['precision']}, recall {report['recall']}, F1 {report['f1']} "
         f"(TP {samples['tp']}, FP {samples['fp']}, FN {samples['fn']}, TN {samples['tn']}).\n"
         f"- Fault level: {fault_level['detected']} of {fault_level['faults']} faults raised an alert on an affected series during the fault.\n"
-        f"- Median lead of a forecast-only alert over the first threshold breach: {report['forecast_lead_minutes_median']} min "
-        f"({report['forecast_lead_samples']} series).\n\n{kinds}"
+        f"- {lead_text(report)}\n\n{kinds}"
     )
 
 
