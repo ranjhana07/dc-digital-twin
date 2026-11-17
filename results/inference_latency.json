@@ -1,0 +1,244 @@
+{
+  "torch_threads": 1,
+  "forward_pass": [
+    {
+      "task": "thermal",
+      "engine": "eager",
+      "batch": 1,
+      "p50_ms": 4.647,
+      "p95_ms": 13.679,
+      "mean_ms": 6.415,
+      "per_series_ms": 4.647
+    },
+    {
+      "task": "thermal",
+      "engine": "eager",
+      "batch": 16,
+      "p50_ms": 5.837,
+      "p95_ms": 24.918,
+      "mean_ms": 8.949,
+      "per_series_ms": 0.3648
+    },
+    {
+      "task": "thermal",
+      "engine": "eager",
+      "batch": 64,
+      "p50_ms": 10.261,
+      "p95_ms": 19.46,
+      "mean_ms": 11.623,
+      "per_series_ms": 0.1603
+    },
+    {
+      "task": "thermal",
+      "engine": "eager",
+      "batch": 256,
+      "p50_ms": 28.071,
+      "p95_ms": 40.721,
+      "mean_ms": 29.355,
+      "per_series_ms": 0.1097
+    },
+    {
+      "task": "thermal",
+      "engine": "torchscript",
+      "batch": 1,
+      "p50_ms": 4.316,
+      "p95_ms": 10.39,
+      "mean_ms": 5.348,
+      "per_series_ms": 4.316
+    },
+    {
+      "task": "thermal",
+      "engine": "torchscript",
+      "batch": 16,
+      "p50_ms": 6.251,
+      "p95_ms": 13.23,
+      "mean_ms": 7.44,
+      "per_series_ms": 0.3907
+    },
+    {
+      "task": "thermal",
+      "engine": "torchscript",
+      "batch": 64,
+      "p50_ms": 10.29,
+      "p95_ms": 19.449,
+      "mean_ms": 11.343,
+      "per_series_ms": 0.1608
+    },
+    {
+      "task": "thermal",
+      "engine": "torchscript",
+      "batch": 256,
+      "p50_ms": 27.741,
+      "p95_ms": 46.096,
+      "mean_ms": 29.746,
+      "per_series_ms": 0.1084
+    },
+    {
+      "task": "power",
+      "engine": "eager",
+      "batch": 1,
+      "p50_ms": 4.417,
+      "p95_ms": 9.112,
+      "mean_ms": 5.086,
+      "per_series_ms": 4.417
+    },
+    {
+      "task": "power",
+      "engine": "eager",
+      "batch": 16,
+      "p50_ms": 5.632,
+      "p95_ms": 10.903,
+      "mean_ms": 6.434,
+      "per_series_ms": 0.352
+    },
+    {
+      "task": "power",
+      "engine": "eager",
+      "batch": 64,
+      "p50_ms": 11.311,
+      "p95_ms": 22.778,
+      "mean_ms": 12.46,
+      "per_series_ms": 0.1767
+    },
+    {
+      "task": "power",
+      "engine": "eager",
+      "batch": 256,
+      "p50_ms": 26.006,
+      "p95_ms": 43.75,
+      "mean_ms": 28.728,
+      "per_series_ms": 0.1016
+    },
+    {
+      "task": "power",
+      "engine": "torchscript",
+      "batch": 1,
+      "p50_ms": 4.497,
+      "p95_ms": 11.072,
+      "mean_ms": 5.196,
+      "per_series_ms": 4.497
+    },
+    {
+      "task": "power",
+      "engine": "torchscript",
+      "batch": 16,
+      "p50_ms": 5.009,
+      "p95_ms": 10.699,
+      "mean_ms": 6.064,
+      "per_series_ms": 0.3131
+    },
+    {
+      "task": "power",
+      "engine": "torchscript",
+      "batch": 64,
+      "p50_ms": 9.198,
+      "p95_ms": 18.919,
+      "mean_ms": 10.621,
+      "per_series_ms": 0.1437
+    },
+    {
+      "task": "power",
+      "engine": "torchscript",
+      "batch": 256,
+      "p50_ms": 28.498,
+      "p95_ms": 51.731,
+      "mean_ms": 32.08,
+      "per_series_ms": 0.1113
+    },
+    {
+      "task": "ber",
+      "engine": "eager",
+      "batch": 1,
+      "p50_ms": 4.303,
+      "p95_ms": 7.691,
+      "mean_ms": 4.629,
+      "per_series_ms": 4.303
+    },
+    {
+      "task": "ber",
+      "engine": "eager",
+      "batch": 16,
+      "p50_ms": 6.189,
+      "p95_ms": 17.146,
+      "mean_ms": 7.808,
+      "per_series_ms": 0.3868
+    },
+    {
+      "task": "ber",
+      "engine": "eager",
+      "batch": 64,
+      "p50_ms": 12.358,
+      "p95_ms": 37.695,
+      "mean_ms": 15.157,
+      "per_series_ms": 0.1931
+    },
+    {
+      "task": "ber",
+      "engine": "eager",
+      "batch": 256,
+      "p50_ms": 25.428,
+      "p95_ms": 34.576,
+      "mean_ms": 26.246,
+      "per_series_ms": 0.0993
+    },
+    {
+      "task": "ber",
+      "engine": "torchscript",
+      "batch": 1,
+      "p50_ms": 4.579,
+      "p95_ms": 9.271,
+      "mean_ms": 5.321,
+      "per_series_ms": 4.579
+    },
+    {
+      "task": "ber",
+      "engine": "torchscript",
+      "batch": 16,
+      "p50_ms": 6.578,
+      "p95_ms": 11.413,
+      "mean_ms": 7.368,
+      "per_series_ms": 0.4111
+    },
+    {
+      "task": "ber",
+      "engine": "torchscript",
+      "batch": 64,
+      "p50_ms": 11.508,
+      "p95_ms": 31.956,
+      "mean_ms": 14.348,
+      "per_series_ms": 0.1798
+    },
+    {
+      "task": "ber",
+      "engine": "torchscript",
+      "batch": 256,
+      "p50_ms": 25.831,
+      "p95_ms": 39.261,
+      "mean_ms": 26.404,
+      "per_series_ms": 0.1009
+    }
+  ],
+  "service_cycle_thermal": [
+    {
+      "devices": 16,
+      "p50_ms": 123.049,
+      "p95_ms": 159.041,
+      "mean_ms": 127.571,
+      "per_device_ms": 7.6905
+    },
+    {
+      "devices": 64,
+      "p50_ms": 537.211,
+      "p95_ms": 628.395,
+      "mean_ms": 545.902,
+      "per_device_ms": 8.3939
+    },
+    {
+      "devices": 256,
+      "p50_ms": 2689.702,
+      "p95_ms": 3392.001,
+      "mean_ms": 2707.866,
+      "per_device_ms": 10.5066
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "setup": {
+    "racks": 6,
+    "window_hours": 3.0,
+    "alert_source": "first threshold breach per device and metric"
+  },
+  "single_fault": {
+    "incidents": 200,
+    "top1_accuracy": 1.0,
+    "top3_accuracy": 1.0,
+    "by_kind": {
+      "cooling_failure": {
+        "incidents": 50,
+        "top1": 50,
+        "top3": 50,
+        "no_alerts": 0
+      },
+      "fan_degradation": {
+        "incidents": 50,
+        "top1": 50,
+        "top3": 50,
+        "no_alerts": 0
+      },
+      "dirty_optics": {
+        "incidents": 50,
+        "top1": 50,
+        "top3": 50,
+        "no_alerts": 0
+      },
+      "pdu_overload": {
+        "incidents": 50,
+        "top1": 50,
+        "top3": 50,
+        "no_alerts": 0
+      }
+    }
+  },
+  "dual_fault": {
+    "incidents": 100,
+    "top1_is_a_true_cause": 1.0,
+    "both_causes_in_top3": 0.61
+  }
+}

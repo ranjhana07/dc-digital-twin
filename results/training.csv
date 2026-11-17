@@ -1,0 +1,4 @@
+task,epochs_run,train_seconds,best_val_loss
+ber,12,114.4,0.16127
+power,20,99.1,0.05374
+thermal,8,136.8,0.10324

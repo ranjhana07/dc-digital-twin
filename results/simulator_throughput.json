@@ -1,0 +1,38 @@
+[
+  {
+    "racks": 12,
+    "devices": 100,
+    "stage": "step",
+    "steps": 600,
+    "readings": 256800,
+    "seconds": 0.757,
+    "readings_per_s": 339399
+  },
+  {
+    "racks": 12,
+    "devices": 100,
+    "stage": "step+topic+payload",
+    "steps": 600,
+    "readings": 256800,
+    "seconds": 3.204,
+    "readings_per_s": 80155
+  },
+  {
+    "racks": 48,
+    "devices": 392,
+    "stage": "step",
+    "steps": 600,
+    "readings": 1003200,
+    "seconds": 3.622,
+    "readings_per_s": 276950
+  },
+  {
+    "racks": 48,
+    "devices": 392,
+    "stage": "step+topic+payload",
+    "steps": 600,
+    "readings": 1003200,
+    "seconds": 13.665,
+    "readings_per_s": 73416
+  }
+]

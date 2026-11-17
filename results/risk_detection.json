@@ -1,0 +1,48 @@
+{
+  "setup": {
+    "hours": 48.0,
+    "faults": 8,
+    "racks": 6,
+    "seed": 101,
+    "alert_score": 0.5,
+    "active_intensity": 0.3
+  },
+  "samples": {
+    "tp": 1970,
+    "fp": 0,
+    "fn": 2296,
+    "tn": 215694
+  },
+  "precision": 1.0,
+  "recall": 0.4618,
+  "f1": 0.6318,
+  "fault_level": {
+    "faults": 8,
+    "detected": 8,
+    "recall": 1.0
+  },
+  "by_kind": {
+    "cooling_failure": {
+      "faults": 2,
+      "detected": 2,
+      "median_detection_delay_min": 5.1
+    },
+    "fan_degradation": {
+      "faults": 2,
+      "detected": 2,
+      "median_detection_delay_min": 10.0
+    },
+    "dirty_optics": {
+      "faults": 2,
+      "detected": 2,
+      "median_detection_delay_min": 6.050000000000001
+    },
+    "pdu_overload": {
+      "faults": 2,
+      "detected": 2,
+      "median_detection_delay_min": 4.95
+    }
+  },
+  "forecast_lead_minutes_median": null,
+  "forecast_lead_samples": 0
+}
