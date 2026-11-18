@@ -144,3 +144,136 @@ Static files in `dashboard/`, served by nginx, which also proxies `/api/` and `/
 ## Root cause analysis
 
 Alerts within 30 minutes of each other form an incident. Every alerting device and everything upstream of it becomes a candidate, scored on coverage, temporal precedence, precision and severity. See `src/twin/rca/README.md`.
+
+## Results
+
+Every number below comes from a script in `benchmarks/` and the raw output is committed in `results/`. `make bench` regenerates them and `make results` prints the tables below. Nothing here comes from a live Postgres or MQTT broker.
+
+How the numbers were produced:
+
+- Data: `python -m twin.simulator.export --hours 96 --faults 16 --out data/bench.csv`, 2 halls with 6 racks each, one sample per minute.
+- Models: `python -m twin.ml.train --task all --csv data/bench.csv --out checkpoints/bench --epochs 20 --patience 4 --hidden 32 --layers 1 --stride 6 --threads 1`. Windows are 60 minutes in, 30 minutes out. The test set is the last 15% of each device's series.
+- Forecast errors are in the metric's own unit. BER is evaluated in log10 space. The baseline is persistence, the last observed value repeated over the horizon. `results/forecast_summary.csv` also holds MAPE.
+- Risk detection and RCA use fresh simulations with different seeds from the training data. `benchmarks/risk_eval.py` and `benchmarks/rca_eval.py` document how positives and ground truth are defined.
+- The machine was busy with other processes during these runs, so the timing numbers are likely worse than an idle machine would give.
+
+Measured on 13th Gen Intel(R) Core(TM) i5-13420H (12 logical cores), Windows 11 (10.0.26200), Python 3.12.10, torch 2.15.0+cpu (CPU).
+
+### Simulator throughput
+
+| racks | devices | stage | readings | seconds | readings/s |
+| --- | --- | --- | --- | --- | --- |
+| 12 | 100 | step | 256800 | 0.757 | 339,399 |
+| 12 | 100 | step+topic+payload | 256800 | 3.204 | 80,155 |
+| 48 | 392 | step | 1003200 | 3.622 | 276,950 |
+| 48 | 392 | step+topic+payload | 1003200 | 13.665 | 73,416 |
+
+### Forecast accuracy
+
+| task | target | GRU MAE | persistence MAE | MAE change | GRU RMSE | persistence RMSE | RMSE change | test windows |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| ber | rx_power_dbm | 0.0636 | 0.0778 | -18.2% | 0.2756 | 0.2814 | -2.1% | 3120 |
+| ber | pre_fec_ber | 0.1432 | 0.1804 | -20.6% | 0.2335 | 0.2686 | -13.1% | 3120 |
+| power | power_w | 44.8528 | 48.9548 | -8.4% | 69.8703 | 74.6268 | -6.4% | 1560 |
+| power | load_pct | 1.8699 | 2.0398 | -8.3% | 2.9141 | 3.1095 | -6.3% | 1560 |
+| thermal | inlet_temp | 0.2454 | 0.285 | -13.9% | 0.307 | 0.3576 | -14.1% | 6240 |
+| thermal | outlet_temp | 0.2537 | 0.2799 | -9.4% | 0.3754 | 0.4078 | -8.0% | 6240 |
+
+By horizon:
+
+| task | target | horizon | GRU MAE | persistence MAE | GRU RMSE | persistence RMSE |
+| --- | --- | --- | --- | --- | --- | --- |
+| ber | rx_power_dbm | 5 min | 0.0488 | 0.0545 | 0.1325 | 0.1356 |
+| ber | rx_power_dbm | 15 min | 0.0669 | 0.0827 | 0.295 | 0.3007 |
+| ber | rx_power_dbm | 30 min | 0.08 | 0.1016 | 0.4246 | 0.4323 |
+| ber | pre_fec_ber | 5 min | 0.1237 | 0.1382 | 0.1692 | 0.1855 |
+| ber | pre_fec_ber | 15 min | 0.1503 | 0.1919 | 0.2457 | 0.286 |
+| ber | pre_fec_ber | 30 min | 0.161 | 0.2193 | 0.3011 | 0.3503 |
+| power | power_w | 5 min | 34.2225 | 36.3179 | 46.3452 | 48.2922 |
+| power | power_w | 15 min | 47.6791 | 52.3279 | 73.2247 | 78.2722 |
+| power | power_w | 30 min | 55.7895 | 61.8769 | 93.6435 | 101.5821 |
+| power | load_pct | 5 min | 1.4267 | 1.5133 | 1.9388 | 2.0122 |
+| power | load_pct | 15 min | 1.9897 | 2.1803 | 3.0569 | 3.2613 |
+| power | load_pct | 30 min | 2.3282 | 2.5782 | 3.8966 | 4.2326 |
+| thermal | inlet_temp | 5 min | 0.2203 | 0.2446 | 0.274 | 0.3065 |
+| thermal | inlet_temp | 15 min | 0.2586 | 0.3049 | 0.3208 | 0.382 |
+| thermal | inlet_temp | 30 min | 0.2727 | 0.3145 | 0.3436 | 0.3982 |
+| thermal | outlet_temp | 5 min | 0.1866 | 0.1951 | 0.2487 | 0.2589 |
+| thermal | outlet_temp | 15 min | 0.2748 | 0.3048 | 0.4032 | 0.4401 |
+| thermal | outlet_temp | 30 min | 0.3199 | 0.3586 | 0.5032 | 0.5521 |
+
+Training:
+
+| task | epochs run | train seconds | best val loss |
+| --- | --- | --- | --- |
+| ber | 12 | 114.4 | 0.16127 |
+| power | 20 | 99.1 | 0.05374 |
+| thermal | 8 | 136.8 | 0.10324 |
+
+### Inference latency
+
+Torch threads: 1.
+
+| task | engine | batch | p50 ms | p95 ms | ms per series |
+| --- | --- | --- | --- | --- | --- |
+| thermal | eager | 1 | 4.647 | 13.679 | 4.647 |
+| thermal | eager | 16 | 5.837 | 24.918 | 0.3648 |
+| thermal | eager | 64 | 10.261 | 19.46 | 0.1603 |
+| thermal | eager | 256 | 28.071 | 40.721 | 0.1097 |
+| thermal | torchscript | 1 | 4.316 | 10.39 | 4.316 |
+| thermal | torchscript | 16 | 6.251 | 13.23 | 0.3907 |
+| thermal | torchscript | 64 | 10.29 | 19.449 | 0.1608 |
+| thermal | torchscript | 256 | 27.741 | 46.096 | 0.1084 |
+| power | eager | 1 | 4.417 | 9.112 | 4.417 |
+| power | eager | 16 | 5.632 | 10.903 | 0.352 |
+| power | eager | 64 | 11.311 | 22.778 | 0.1767 |
+| power | eager | 256 | 26.006 | 43.75 | 0.1016 |
+| power | torchscript | 1 | 4.497 | 11.072 | 4.497 |
+| power | torchscript | 16 | 5.009 | 10.699 | 0.3131 |
+| power | torchscript | 64 | 9.198 | 18.919 | 0.1437 |
+| power | torchscript | 256 | 28.498 | 51.731 | 0.1113 |
+| ber | eager | 1 | 4.303 | 7.691 | 4.303 |
+| ber | eager | 16 | 6.189 | 17.146 | 0.3868 |
+| ber | eager | 64 | 12.358 | 37.695 | 0.1931 |
+| ber | eager | 256 | 25.428 | 34.576 | 0.0993 |
+| ber | torchscript | 1 | 4.579 | 9.271 | 4.579 |
+| ber | torchscript | 16 | 6.578 | 11.413 | 0.4111 |
+| ber | torchscript | 64 | 11.508 | 31.956 | 0.1798 |
+| ber | torchscript | 256 | 25.831 | 39.261 | 0.1009 |
+
+Full thermal cycle (assemble windows, two forecasts per device, risk and alert specs, in-memory store):
+
+| devices | p50 ms | p95 ms | ms per device |
+| --- | --- | --- | --- |
+| 16 | 123.049 | 159.041 | 7.6905 |
+| 64 | 537.211 | 628.395 | 8.3939 |
+| 256 | 2689.702 | 3392.001 | 10.5066 |
+
+### Risk detection
+
+48 simulated hours, 8 injected faults, 6 racks, seed 101, alert at risk >= 0.5 or a current threshold breach.
+
+- Sample level: precision 1.0, recall 0.4618, F1 0.6318 (TP 1970, FP 0, FN 2296, TN 215694).
+- Fault level: 8 of 8 faults raised an alert on an affected series during the fault.
+- No forecast-only alert fired before a threshold breach on an affected series.
+
+| fault kind | faults | detected | median delay after onset (min) |
+| --- | --- | --- | --- |
+| cooling_failure | 2 | 2 | 5.1 |
+| fan_degradation | 2 | 2 | 10.0 |
+| dirty_optics | 2 | 2 | 6.050000000000001 |
+| pdu_overload | 2 | 2 | 4.95 |
+
+### Root cause ranking
+
+Single fault, 200 incidents: top-1 1.0, top-3 1.0.
+
+| fault kind | incidents | top-1 | top-3 |
+| --- | --- | --- | --- |
+| cooling_failure | 50 | 50 | 50 |
+| fan_degradation | 50 | 50 | 50 |
+| dirty_optics | 50 | 50 | 50 |
+| pdu_overload | 50 | 50 | 50 |
+
+Two concurrent faults, 100 incidents: top-1 is a true cause in 1.0 of them, both true causes within the top 3 in 0.61.
+
