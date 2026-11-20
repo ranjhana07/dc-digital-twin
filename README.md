@@ -277,3 +277,37 @@ Single fault, 200 incidents: top-1 1.0, top-3 1.0.
 
 Two concurrent faults, 100 incidents: top-1 is a true cause in 1.0 of them, both true causes within the top 3 in 0.61.
 
+
+## Project layout
+
+```
+db/migrations/        SQL migrations
+dashboard/            static frontend, nginx.conf, node tests
+docker/               Dockerfiles for the Python services and the dashboard
+ingest/               mosquitto config and the Node-RED flow
+src/twin/common/      settings, metric catalog, topics, payloads, topology
+src/twin/simulator/   signal models, faults, engine, MQTT publisher, CSV export
+src/twin/ingest/      validation, batcher, Postgres sink, worker
+src/twin/db/          migration runner, topology sync
+src/twin/ml/          datasets, GRU model, training, evaluation, export, risk, inference
+src/twin/rca/         asset graph and root cause ranking
+src/twin/api/         FastAPI app, routers, health scoring, SQL repository
+benchmarks/           scripts that produce the files in results/
+results/              raw output of the benchmark scripts
+tests/                pytest suite
+```
+
+## Testing
+
+```
+make test
+make test-js
+```
+
+The Python tests cover topic parsing, signal models and fault injection, batching, windowing and scaling, GRU shapes (skipped without torch), risk scoring, the inference loop against a fake store, RCA ranking on a small synthetic topology, and every API route against an in-memory repository. None of them need Postgres, MQTT or network access. The SQL repository itself is only checked for protocol coverage and query compilation, since it needs a live database.
+
+## Not verified here
+
+The Compose stack, the Node-RED flow, the Postgres migrations, the SQL repository and the MQTT publisher were written to be run with Docker, Postgres and a broker, none of which were available while developing this. They are untested end to end.
+
+`benchmarks/ingest_bench.py` measures `COPY` against `execute_values` insert throughput into a live `telemetry` table (`python -m benchmarks.ingest_bench --dsn postgresql://twin:twin@localhost:5432/twin`). No ingestion numbers are reported above because it has not been run.
